@@ -1,12 +1,12 @@
 version: 2.1
+executors:
+  my_executor:
+    docker:
+      - image: circleci/openjdk:8
 
 jobs:
   build:
-    docker:
-      - image: circleci/openjdk:8
-        environment:
-          BASH_ENV: ~/.bashrc
-
+    executor: my_executor
     steps:
       - checkout
       - run:
@@ -16,10 +16,26 @@ jobs:
               curl -o ~/bin/digdag -L "https://dl.digdag.io/digdag-latest"
               chmod +x ~/bin/digdag
               echo 'export PATH="$HOME/bin:$PATH"' >> $BASH_ENV
+
+  deploy:
+    executor: my_executor
+    steps:
+      - checkout
       - run:
           name: Check config
           command: digdag check
-
       - run:
-          name: Deploy
-          command: digdag push $CIRCLE_PROJECT_REPONAME -e api-workflow.treasuredata.com -X client.http.headers.authorization="TD1 $TD_API_KEY" -r `date -u +"%Y-%m-%dT%H:%M:%SZ"`-`git rev-parse HEAD`
+          name: Push project
+          command: digdag push $WF_PROJECT -e api-workflow.treasuredata.com -X client.http.headers.authorization="TD1 $TD_API_KEY" -r `date -u +"%Y-%m-%dT%H:%M:%SZ"`-`git rev-parse HEAD`
+
+workflows:
+  version: 2
+  build-n-deploy:
+    jobs:
+      - build
+      - deploy:
+          filters:
+            branches:
+              only:
+                - master
+
