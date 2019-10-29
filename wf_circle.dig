@@ -1,0 +1,12 @@
+_export:
+  td:
+    database: kasai_test
+  table: output_from_circle
+
++prepare:
+  td_ddl>:
+  create_tables: ["${table}"]
+
++aggregate:
+  td>: query/sql01.sql
+  insert_into: ${table}
