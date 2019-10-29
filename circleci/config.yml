@@ -1,0 +1,25 @@
+version: 2.1
+
+jobs:
+  build:
+    docker:
+      - image: circleci/openjdk:8
+        environment:
+          BASH_ENV: ~/.bashrc
+
+    steps:
+      - checkout
+      - run:
+          name: Setup
+          command: |
+              mkdir -p ~/bin/
+              curl -o ~/bin/digdag -L "https://dl.digdag.io/digdag-latest"
+              chmod +x ~/bin/digdag
+              echo 'export PATH="$HOME/bin:$PATH"' >> $BASH_ENV
+      - run:
+          name: Check config
+          command: digdag check
+
+      - run:
+          name: Deploy
+          command: digdag push $CIRCLE_PROJECT_REPONAME -e api-workflow.treasuredata.com -X client.http.headers.authorization="TD1 $TD_API_KEY" -r `date -u +"%Y-%m-%dT%H:%M:%SZ"`-`git rev-parse HEAD`
