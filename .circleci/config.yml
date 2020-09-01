@@ -27,9 +27,14 @@ workflows:
   version: 2
   build-n-deploy:
     jobs:
-      - digdag:
-          filters:
-            branches:
-              only:
-                - master
+      - digdag
+      # If you would like to restrict running jobs, use `filters` option.
+      # Following filter means `digdag` job will execute only branches matching `only` keyword as follows.
+      # @see: https://circleci.com/docs/2.0/workflows/
+      #  - digdag:
+      #      filters:
+      #        branches:
+      #          only:
+      #            - dev
+      #            - /user-.*/
 
